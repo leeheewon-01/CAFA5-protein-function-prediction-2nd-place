@@ -4,6 +4,9 @@ import sys
 
 import tqdm
 
+import warnings
+warnings.filterwarnings('ignore')
+
 sys.path.append(os.path.abspath(os.path.join(__file__, '../../../')))
 
 parser = argparse.ArgumentParser()
@@ -57,7 +60,7 @@ if __name__ == '__main__':
 
     flg = True
 
-    for i in tqdm.tqdm(range(0, length, args.batch_size)):
+    for i in tqdm.tqdm(range(0, length, args.batch_size), total=len(range(0, length, args.batch_size))):
 
         sample = trainTerms.query(f'(id >= {i}) & (id < {i + args.batch_size})')
         batch_len = min(args.batch_size, length - i)
