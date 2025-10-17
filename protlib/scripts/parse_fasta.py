@@ -13,7 +13,9 @@ parser.add_argument('-c', '--config-path', type=str)
 def create_train(path, output):
     df = []
     d_row, seq = None, None
-    tax = pd.read_csv(os.path.join(path, 'train_taxonomy.tsv'), sep='\t', index_col='EntryID').squeeze()
+    tax = pd.read_csv(os.path.join(path, 'train_taxonomy.tsv'), sep='\t', on_bad_lines='skip', header = None).squeeze()
+    tax.columns = ['EntryID', 'taxonomyID']
+    tax = tax.set_index('EntryID')
 
     with open(os.path.join(path, 'train_sequences.fasta')) as f:
 
@@ -30,10 +32,16 @@ def create_train(path, output):
                 # initialize d_row and empty seq
                 d_row, seq = {}, ''
                 # parse first line
-                d_row['EntryID'], row = row[1:].split(' ', 1)
-                d_row['taxonomyID'] = tax[d_row['EntryID']]
-                d_row['source'], _, row = row.split('|', 2)
-                d_row['gene_name'], row = row.split(' ', 1)
+                d_row['EntryID'] = row[1:].split(' ', 1)[0].split('|')[1]
+                
+                
+                d_row['taxonomyID'] = tax.loc[d_row['EntryID'], 'taxonomyID']
+                
+                
+                d_row['source'] = row.split(' ')[0].split('|')[2]
+                
+                d_row['gene_name'] = row.split(' ')[1]
+                
 
                 k = 'descr'
 
@@ -79,7 +87,7 @@ def create_test(path, output):
                 # initialize d_row and empty seq
                 d_row, seq = {}, ''
                 # parse first line
-                d_row['EntryID'], d_row['taxonomyID'] = row[1:-1].split('\t', 1)
+                d_row['EntryID'], d_row['taxonomyID'] = row[1:-1].split(' ', 1)
                 d_row['taxonomyID'] = int(d_row['taxonomyID'])
 
             else:
@@ -102,7 +110,7 @@ if __name__ == '__main__':
         config = yaml.safe_load(f)
     helpers_path = os.path.join(config['base_path'], config['helpers_path'])
     train_path = os.path.join(config['base_path'], 'Train/')
-    test_path = os.path.join(config['base_path'], 'Test (Targets)/')
+    test_path = os.path.join(config['base_path'], 'Test/')
     output_path = os.path.join(helpers_path, 'fasta')
 
     os.makedirs(output_path, exist_ok=True)
