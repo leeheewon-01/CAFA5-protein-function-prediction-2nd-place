@@ -74,7 +74,7 @@ if __name__ == '__main__':
     np.save(os.path.join(output_path, f'train_embeds.npy'), embeds)
     np.save(os.path.join(output_path, f'train_ids.npy'), np.array(ids))
 
-    fn = os.path.join(kaggle_dataset, 'Test (Targets)', 'testsuperset.fasta')
+    fn = os.path.join(kaggle_dataset, 'Test', 'testsuperset.fasta')
 
     sequences = SeqIO.parse(fn, "fasta")
     num_sequences = sum(1 for seq in sequences)
